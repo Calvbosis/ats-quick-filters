@@ -1,0 +1,611 @@
+<meta charset="UTF-8">
+<title>ATS Quick Filters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============ TOKENS ============ */
+:root{
+  --bg:#EDF1F6;
+  --surface:#FFFFFF;
+  --surface-muted:#F8FAFC;
+  --surface-sunken:#F1F5F9;
+  --border:#E2E8F0;
+  --border-strong:#CBD5E1;
+  --ink:#0F172A;
+  --ink-muted:#5B6B82;
+  --ink-faint:#94A3B8;
+  --brand:#15803D;
+  --brand-dark:#14532D;
+  --brand-fg:#FFFFFF;
+  --brand-tint:#DCFCE7;
+  --brand-tint-strong:#BBF7D0;
+  --brand-tint-text:#166534;
+  --info-bg:#DBEAFE;
+  --info-text:#1D4ED8;
+  --danger-bg:#FEE2E2;
+  --danger-text:#B91C1C;
+  --shadow-card:0 1px 2px rgba(15,23,42,.05), 0 10px 28px -10px rgba(15,23,42,.14);
+  --shadow-pop:0 16px 40px -12px rgba(15,23,42,.30), 0 3px 10px rgba(15,23,42,.10);
+  --r-outer:22px;
+  --r-card:14px;
+  --r-ctrl:9px;
+  --r-pill:999px;
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button, select, input{font-family:inherit;}
+svg{display:block;flex-shrink:0;}
+
+.app-shell{max-width:1320px;margin:0 auto;padding:28px 20px 80px;}
+
+/* ============ JOBJACK PRODUCT CARD ============ */
+.jj-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r-outer);
+  box-shadow:var(--shadow-card);
+  padding:20px 22px 26px;
+}
+
+/* row 1: title + search */
+.jj-topbar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  margin-bottom:14px;
+}
+.jj-title{
+  font-size:22px;font-weight:700;margin:0;
+  display:flex;align-items:center;gap:10px;letter-spacing:-.01em;
+  flex-shrink:0;
+}
+/* row 2: quick filters + more filters */
+.toolbar-row{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding-bottom:16px;margin-bottom:16px;
+  border-bottom:1px dashed var(--border);
+}
+.badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;padding:0 6px;border-radius:var(--r-pill);
+  background:var(--info-bg);color:var(--info-text);
+  font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;
+}
+.jj-search{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface-muted);border:1px solid var(--border);
+  border-radius:var(--r-ctrl);padding:9px 12px;
+  min-width:230px;color:var(--ink-faint);
+}
+.jj-search svg{color:var(--ink-faint);}
+.jj-search input{border:0;background:transparent;outline:0;font-size:13.5px;color:var(--ink);width:100%;}
+.jj-search input::placeholder{color:var(--ink-faint);}
+.toolbar-divider{width:0;height:24px;border-left:1px solid var(--border-strong);flex-shrink:0;margin:0 4px;}
+.toolbar-spacer{flex:1;min-width:8px;}
+
+.jj-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  border-radius:var(--r-ctrl);font-size:13px;font-weight:600;padding:9px 14px;
+  cursor:pointer;border:1px solid transparent;white-space:nowrap;
+  transition:background .12s, border-color .12s, color .12s, transform .08s;
+}
+.jj-btn:active{transform:scale(.98);}
+.jj-btn--primary{background:var(--brand);color:var(--brand-fg);}
+.jj-btn--primary:hover{background:var(--brand-dark);}
+.jj-btn--secondary{background:var(--brand-tint);color:var(--brand-tint-text);border-color:var(--brand-tint-strong);}
+.jj-btn--secondary:hover{background:var(--brand-tint-strong);}
+.jj-btn--ghost{background:var(--surface);color:var(--ink-muted);border-color:var(--border-strong);}
+.jj-btn--ghost:hover{background:var(--surface-muted);color:var(--ink);}
+.jj-btn--ghost.is-active{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-tint-text);}
+.jj-btn--ghost.is-active:hover{background:var(--brand-tint-strong);}
+.jj-btn--sm{padding:6px 10px;font-size:12px;}
+.mf-count{display:none;}
+.jj-btn--ghost.is-active .mf-count{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:16px;height:16px;padding:0 4px;border-radius:var(--r-pill);
+  background:var(--brand);color:var(--brand-fg);font-size:10px;font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.link-btn{
+  background:none;border:0;color:var(--brand);font-weight:600;font-size:12.5px;cursor:pointer;padding:0;
+  text-decoration:underline;text-underline-offset:2px;white-space:nowrap;
+}
+.clear-all{display:none;align-items:center;gap:6px;}
+.clear-all.is-visible{display:inline-flex;}
+
+.f-select{
+  appearance:none;-webkit-appearance:none;
+  background:var(--surface) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path d="M1 1l4 4 4-4" stroke="%235B6B82" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>') no-repeat right 9px center;
+  border:1px solid var(--border-strong);border-radius:var(--r-ctrl);
+  padding:7px 26px 7px 12px;font-size:12px;font-weight:600;color:var(--ink-muted);
+  cursor:pointer;min-width:0;
+}
+.f-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+.f-select.is-active{border-color:var(--brand);background-color:var(--brand-tint);color:var(--brand-tint-text);}
+.f-toggle{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid var(--border-strong);border-radius:var(--r-ctrl);background:var(--surface);
+  color:var(--ink-muted);font-size:12px;font-weight:600;padding:7px 12px;cursor:pointer;
+}
+.f-toggle[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-tint-text);}
+
+/* ============ SECTIONS / TABLE ============ */
+.section{
+  border:1px solid var(--border);border-radius:var(--r-card);
+  margin-bottom:14px;overflow:hidden;background:var(--surface);
+}
+.section:last-of-type{margin-bottom:0;}
+.section > summary{list-style:none;cursor:pointer;}
+.section > summary::-webkit-details-marker{display:none;}
+.sec-row1{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:14px 18px;background:var(--surface-sunken);
+}
+.section[open] .sec-row1{border-bottom:1px solid var(--border);}
+.chevron{color:var(--ink-muted);transition:transform .15s;flex-shrink:0;}
+.section[open] .chevron{transform:rotate(180deg);}
+.sec-row1 h3{font-size:14.5px;margin:0;font-weight:700;}
+.sec-spacer{flex:1;}
+.jobfit{display:flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink-muted);}
+.jobfit svg{color:var(--ink-faint);}
+.of-total{font-size:11.5px;color:var(--ink-faint);display:none;}
+.of-total.is-visible{display:inline;}
+
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:640px;}
+thead th{
+  text-align:left;font-size:11.5px;font-weight:700;color:var(--ink-faint);
+  padding:10px 18px;background:var(--surface-muted);border-bottom:1px solid var(--border);
+}
+tbody td{padding:13px 18px;border-bottom:1px solid var(--border);font-size:13.5px;vertical-align:middle;}
+tbody tr:last-child td{border-bottom:0;}
+.col-check{width:36px;}
+.col-action{width:1%;text-align:right;}
+input[type="checkbox"]{width:16px;height:16px;accent-color:var(--brand);}
+.row-name{display:flex;align-items:center;gap:10px;font-weight:600;}
+.row-meta{color:var(--ink-faint);font-weight:500;font-size:12px;}
+.unviewed-dot{width:7px;height:7px;border-radius:50%;background:var(--info-text);flex-shrink:0;}
+.avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--surface-sunken);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-faint);flex-shrink:0;
+  border:1px solid var(--border);
+}
+.no-tags{color:var(--ink-faint);font-style:italic;font-size:13px;}
+.tag-chip{display:inline-flex;align-items:center;font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:var(--r-pill);}
+.tag-chip.k-info{background:var(--info-bg);color:var(--info-text);}
+.tag-chip.k-danger{background:var(--danger-bg);color:var(--danger-text);}
+.tag-chip.k-brand{background:var(--brand-tint);color:var(--brand-tint-text);}
+.doc-status{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-muted);}
+.doc-status.reviewed{color:var(--brand-tint-text);}
+.doc-status svg{flex-shrink:0;}
+.empty-row td{padding:26px 18px;text-align:center;color:var(--ink-muted);font-size:13px;}
+.empty-row .empty-icon{color:var(--ink-faint);margin:0 auto 8px;}
+
+.pagination{display:none;align-items:center;justify-content:flex-end;gap:10px;padding:12px 18px;}
+.pagination.is-visible{display:flex;}
+.page-indicator{font-size:12px;color:var(--ink-muted);font-variant-numeric:tabular-nums;}
+.page-btn{
+  width:30px;height:30px;border-radius:8px;border:1px solid var(--border-strong);
+  background:var(--surface-muted);color:var(--ink-muted);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:12.5px;font-weight:700;
+}
+.page-btn:disabled{opacity:.4;cursor:default;}
+.page-btn:not(:disabled):hover{background:var(--surface);color:var(--ink);}
+
+/* ============ DRAWER ============ */
+.drawer-overlay{
+  position:fixed;inset:0;background:rgba(10,15,26,.45);
+  display:none;align-items:stretch;justify-content:flex-end;z-index:60;
+}
+.drawer-overlay.is-open{display:flex;}
+.drawer{
+  width:min(380px, 92vw);background:var(--surface);height:100%;
+  box-shadow:var(--shadow-pop);display:flex;flex-direction:column;transform:translateX(12px);
+}
+.drawer-head{padding:20px 22px 14px;border-bottom:1px solid var(--border);}
+.drawer-head-row{display:flex;align-items:flex-start;justify-content:space-between;}
+.drawer-head h2{font-size:17px;margin:0 0 4px;}
+.drawer-head p{font-size:12.5px;color:var(--ink-muted);margin:0;}
+.drawer-close{
+  width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:var(--surface-muted);
+  color:var(--ink-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.drawer-body{flex:1;overflow-y:auto;padding:6px 0;}
+.acc{border-bottom:1px solid var(--border);}
+.acc > summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;font-weight:700;font-size:13.5px;
+}
+.acc > summary::-webkit-details-marker{display:none;}
+.acc .chevron{transform:rotate(180deg);}
+.acc:not([open]) .chevron{transform:rotate(0deg);}
+.acc-content{padding:2px 22px 18px;display:flex;flex-direction:column;gap:14px;}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--ink-muted);margin-bottom:6px;}
+.field .f-select{width:100%;border-radius:var(--r-ctrl);text-align:left;}
+.ghost-input{
+  border:1px solid var(--border-strong);border-radius:var(--r-ctrl);padding:9px 12px;font-size:13px;
+  color:var(--ink-faint);background:var(--surface);
+}
+.drawer-foot{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:10px;}
+.drawer-foot .jj-btn{flex:1;justify-content:center;}
+
+@media (max-width:720px){ table{min-width:560px;} }
+</style>
+
+<div class="app-shell">
+
+  <div class="jj-card">
+    <div class="jj-topbar">
+      <h2 class="jj-title">Applicants <span class="badge" id="totalBadge">27</span></h2>
+      <div class="toolbar-spacer"></div>
+      <label class="jj-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><input type="text" class="search-input" placeholder="Search applicants"></label>
+    </div>
+    <div class="toolbar-row">
+      <button class="f-toggle" data-key="unviewed" aria-pressed="false" title="Show only profiles you haven't opened yet">Unviewed profiles</button>
+      <button class="f-toggle" data-key="relevantExperience" aria-pressed="false" title="Show only applicants with experience relevant to this role">Relevant experience</button>
+      <select class="f-select" data-key="radius" id="radiusSelect"></select>
+      <select class="f-select" data-key="age" id="ageSelect"></select>
+      <select class="f-select" data-key="gender" id="genderSelect"></select>
+      <div class="toolbar-divider"></div>
+      <button class="jj-btn jj-btn--ghost" id="moreFiltersBtn" onclick="openDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6h10M4 12h6M4 18h13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="17" cy="6" r="2.2" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="18" r="2.2" stroke="currentColor" stroke-width="2"/></svg> More filters<span class="mf-count" id="mfCount"></span></button>
+      <button class="link-btn clear-all" onclick="clearAll()">Clear all</button>
+    </div>
+
+    <div id="sections"></div>
+  </div>
+</div>
+
+<!-- ================= DRAWER ================= -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="if(event.target===this) closeDrawer()">
+  <div class="drawer">
+    <div class="drawer-head">
+      <div class="drawer-head-row">
+        <div>
+          <h2>Applicant filters</h2>
+          <p>The full field set — quick filters above are shortcuts into these same values.</p>
+        </div>
+        <button class="drawer-close" onclick="closeDrawer()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>
+    </div>
+    <div class="drawer-body">
+      <details class="acc" open>
+        <summary>Location and Transport <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="acc-content">
+          <div class="field"><label>Radius from job location</label><select class="f-select" data-key="radius" id="drawerRadiusSelect"></select></div>
+          <div class="field"><label>Applicant transport</label><select class="f-select" data-key="transport"><option value="any">All transport types</option><option value="car">Own car</option><option value="public">Public transport</option></select></div>
+          <div class="field"><label>Driver's licenses</label><div class="ghost-input">Select licenses</div></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Personal Details <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="acc-content">
+          <div class="field"><label>Age</label><select class="f-select" data-key="age" id="drawerAgeSelect"></select></div>
+          <div class="field"><label>Gender</label><select class="f-select" data-key="gender" id="drawerGenderSelect"></select></div>
+          <div class="field"><label>Languages</label><div class="ghost-input">Select languages</div></div>
+          <div class="field"><label>Nationality</label><div class="ghost-input">Select nationality</div></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Assessments &amp; Qualifications <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="acc-content">
+          <div class="field"><label>Highest qualification</label><select class="f-select" data-key="qualification"><option value="any">Any</option><option value="grade12">Grade 12+</option><option value="diploma">Diploma+</option><option value="degree">Degree+</option></select></div>
+          <div class="field"><label>Assessment scores</label><select class="f-select" data-key="score"><option value="any">Any</option><option value="meets">Meets requirements</option></select></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Experience and Background Checks <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="acc-content">
+          <div class="field"><label>Job experience types</label><div class="ghost-input">Select job experience types</div></div>
+          <button class="f-toggle" data-key="relevantExperience" aria-pressed="false" style="width:100%;justify-content:center;">Relevant experience only</button>
+          <div class="field"><label>Criminal record</label><select class="f-select" data-key="criminal"><option value="any">Show all</option><option value="clean">No criminal record</option></select></div>
+        </div>
+      </details>
+      <details class="acc">
+        <summary>Quick Filters <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+        <div class="acc-content">
+          <button class="f-toggle" data-key="unviewed" aria-pressed="false" style="width:100%;justify-content:center;">Only show unviewed profiles</button>
+        </div>
+      </details>
+    </div>
+    <div class="drawer-foot">
+      <button class="jj-btn jj-btn--ghost" onclick="clearAll()">Clear all</button>
+      <button class="jj-btn jj-btn--primary" onclick="closeDrawer()">Show results</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ ICONS ============ */
+const ICON_CHEVRON_DOWN = `<svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_CHEVRON_LEFT = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_CHEVRON_RIGHT = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_USER = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+const ICON_CHECK = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M8 12l3 3 5-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const ICON_EXCLAIM = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+const ICON_INFO = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+const ICON_SEARCH_EMPTY = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+
+/* ============ DATA — 27 applicants ============ */
+const DATA = [
+  {id:1,  name:'Ainsley P.',  container:'shortlisted', transport:'car',    radius:8,  qualification:'degree',  score:82, criminal:false, viewed:true,  age:29, gender:'female', relevantExperience:true,  tag:{label:'Top match', kind:'info'}},
+  {id:2,  name:'Joshua N.',   container:'shortlisted', transport:'public', radius:15, qualification:'diploma', score:76, criminal:false, viewed:false, age:24, gender:'male',   relevantExperience:true,  tag:null},
+  {id:3,  name:'Keyanna S.',  container:'shortlisted', transport:'car',    radius:22, qualification:'degree',  score:91, criminal:false, viewed:true,  age:33, gender:'female', relevantExperience:true,  tag:null},
+  {id:4,  name:'Janaya H.',   container:'shortlisted', transport:'public', radius:40, qualification:'grade12', score:70, criminal:false, viewed:false, age:21, gender:'female', relevantExperience:false, tag:null},
+
+  {id:5,  name:'Devon R.',    container:'meets', transport:'car',    radius:12, qualification:'diploma', score:74, criminal:false, viewed:true,  age:38, gender:'male',   relevantExperience:true,  tag:{label:'Referral', kind:'brand'}},
+  {id:6,  name:'Lerato M.',   container:'meets', transport:'public', radius:30, qualification:'degree',  score:88, criminal:true,  viewed:false, age:45, gender:'female', relevantExperience:true,  tag:null},
+
+  {id:7,  name:'Naledi B.',   container:'other', transport:'car',    radius:5,  qualification:'grade12', score:55, criminal:false, viewed:true,  age:27, gender:'female', relevantExperience:false, tag:null},
+  {id:8,  name:'Thabo M.',    container:'other', transport:'public', radius:18, qualification:'diploma', score:62, criminal:true,  viewed:false, age:31, gender:'male',   relevantExperience:false, tag:{label:'Flagged', kind:'danger'}},
+  {id:9,  name:'Amanda V.',   container:'other', transport:'none',   radius:60, qualification:'grade12', score:40, criminal:false, viewed:false, age:52, gender:'female', relevantExperience:false, tag:null},
+  {id:10, name:'Kyle D.',     container:'other', transport:'car',    radius:10, qualification:'degree',  score:58, criminal:false, viewed:true,  age:23, gender:'male',   relevantExperience:true,  tag:null},
+  {id:11, name:'Zanele P.',   container:'other', transport:'public', radius:25, qualification:'diploma', score:65, criminal:false, viewed:false, age:36, gender:'female', relevantExperience:false, tag:null},
+  {id:12, name:'Sibusiso N.', container:'other', transport:'car',    radius:14, qualification:'diploma', score:52, criminal:false, viewed:false, age:26, gender:'male',   relevantExperience:false, tag:null},
+  {id:13, name:'Chloe F.',    container:'other', transport:'public', radius:45, qualification:'degree',  score:66, criminal:false, viewed:true,  age:41, gender:'female', relevantExperience:true,  tag:null},
+  {id:14, name:'Karabo T.',   container:'other', transport:'none',   radius:33, qualification:'grade12', score:35, criminal:false, viewed:false, age:19, gender:'male',   relevantExperience:false, tag:null},
+  {id:15, name:'Refilwe M.',  container:'other', transport:'car',    radius:7,  qualification:'degree',  score:60, criminal:false, viewed:true,  age:34, gender:'female', relevantExperience:true,  tag:null},
+  {id:16, name:'Michael O.',  container:'other', transport:'public', radius:22, qualification:'diploma', score:48, criminal:true,  viewed:false, age:47, gender:'male',   relevantExperience:false, tag:null},
+  {id:17, name:'Palesa D.',   container:'other', transport:'car',    radius:50, qualification:'grade12', score:44, criminal:false, viewed:false, age:22, gender:'female', relevantExperience:false, tag:null},
+  {id:18, name:'Tumi S.',     container:'other', transport:'none',   radius:28, qualification:'diploma', score:57, criminal:false, viewed:true,  age:29, gender:'male',   relevantExperience:true,  tag:null},
+  {id:19, name:'Bongani K.',  container:'other', transport:'public', radius:12, qualification:'degree',  score:63, criminal:false, viewed:false, age:39, gender:'male',   relevantExperience:false, tag:null},
+  {id:20, name:'Amahle R.',   container:'other', transport:'car',    radius:38, qualification:'grade12', score:39, criminal:false, viewed:false, age:20, gender:'female', relevantExperience:false, tag:null},
+  {id:21, name:'Liam P.',     container:'other', transport:'public', radius:9,  qualification:'diploma', score:68, criminal:false, viewed:true,  age:44, gender:'male',   relevantExperience:true,  tag:null},
+  {id:22, name:'Nomvula E.',  container:'other', transport:'none',   radius:55, qualification:'grade12', score:30, criminal:false, viewed:false, age:50, gender:'female', relevantExperience:false, tag:null},
+  {id:23, name:'Dean H.',     container:'other', transport:'car',    radius:19, qualification:'degree',  score:64, criminal:true,  viewed:false, age:32, gender:'male',   relevantExperience:false, tag:null},
+  {id:24, name:'Precious W.', container:'other', transport:'public', radius:31, qualification:'diploma', score:53, criminal:false, viewed:true,  age:25, gender:'female', relevantExperience:true,  tag:null},
+  {id:25, name:'Ryan C.',     container:'other', transport:'car',    radius:6,  qualification:'grade12', score:46, criminal:false, viewed:false, age:37, gender:'male',   relevantExperience:false, tag:null},
+  {id:26, name:'Thandiwe J.', container:'other', transport:'none',   radius:42, qualification:'diploma', score:59, criminal:false, viewed:false, age:43, gender:'female', relevantExperience:false, tag:null},
+  {id:27, name:'Kagiso B.',   container:'other', transport:'public', radius:16, qualification:'degree',  score:67, criminal:false, viewed:true,  age:28, gender:'male',   relevantExperience:true,  tag:null},
+];
+
+const QUAL_RANK = {grade12:1, diploma:2, degree:3};
+const CONTAINERS = [
+  {key:'shortlisted', title:'Shortlisted Applicants', jobfit:true,  actionLabel:'Schedule interview', actionClass:'jj-btn--primary'},
+  {key:'meets',        title:'Applicants Meeting Job Requirements (Not in Shortlist)', jobfit:false, actionLabel:'Add to shortlist',    actionClass:'jj-btn--secondary'},
+  {key:'other',        title:'All other Applicants', jobfit:false, actionLabel:'View profile', actionClass:'jj-btn--ghost'},
+];
+const TOTAL_APPLICANTS = DATA.length;
+const PAGE_SIZE = 6;
+
+const FILTER_DEFS = {
+  radius: [
+    {value:'any', label:'Radius: Any'},
+    {value:'5',   label:'Within 5 km'},
+    {value:'10',  label:'Within 10 km'},
+    {value:'25',  label:'Within 25 km'},
+    {value:'50',  label:'Within 50 km'},
+  ],
+  age: [
+    {value:'any',   label:'Age: Any'},
+    {value:'18-24', label:'18–24'},
+    {value:'25-34', label:'25–34'},
+    {value:'35-44', label:'35–44'},
+    {value:'45+',   label:'45+'},
+  ],
+  gender: [
+    {value:'any',    label:'Gender: All'},
+    {value:'female', label:'Female'},
+    {value:'male',   label:'Male'},
+  ],
+};
+
+let state = {
+  radius:'any', age:'any', gender:'any', unviewed:false, relevantExperience:false, search:'',
+  transport:'any', qualification:'any', score:'any', criminal:'any',
+};
+let pageState = {}; // containerKey -> current page
+
+function ageInBand(age, band){
+  if(band==='any') return true;
+  if(band==='45+') return age>=45;
+  const [lo,hi] = band.split('-').map(Number);
+  return age>=lo && age<=hi;
+}
+function matchesState(a, st){
+  if(st.search && !a.name.toLowerCase().includes(st.search)) return false;
+  if(st.radius!=='any' && a.radius > Number(st.radius)) return false;
+  if(st.age!=='any' && !ageInBand(a.age, st.age)) return false;
+  if(st.gender!=='any' && a.gender!==st.gender) return false;
+  if(st.unviewed && a.viewed) return false;
+  if(st.relevantExperience && !a.relevantExperience) return false;
+  if(st.transport!=='any' && a.transport!==st.transport) return false;
+  if(st.qualification!=='any' && QUAL_RANK[a.qualification] < QUAL_RANK[st.qualification]) return false;
+  if(st.score==='meets' && a.score < 70) return false;
+  if(st.criminal==='clean' && a.criminal===true) return false;
+  return true;
+}
+function matches(a){ return matchesState(a, state); }
+function isAnyFilterActive(){
+  return state.radius!=='any' || state.age!=='any' || state.gender!=='any' || state.unviewed || state.relevantExperience ||
+    state.search.trim()!=='' || state.transport!=='any' || state.qualification!=='any' || state.score!=='any' || state.criminal!=='any';
+}
+function activeFilterCount(){
+  let n = 0;
+  if(state.radius!=='any') n++;
+  if(state.age!=='any') n++;
+  if(state.gender!=='any') n++;
+  if(state.unviewed) n++;
+  if(state.relevantExperience) n++;
+  if(state.transport!=='any') n++;
+  if(state.qualification!=='any') n++;
+  if(state.score==='meets') n++;
+  if(state.criminal!=='any') n++;
+  if(state.search.trim()!=='') n++;
+  return n;
+}
+
+function docStatusHtml(a){
+  return a.viewed
+    ? `<span class="doc-status reviewed">${ICON_CHECK}Reviewed</span>`
+    : `<span class="doc-status">${ICON_EXCLAIM}Not actioned</span>`;
+}
+function tagHtml(a){
+  if(!a.tag) return `<span class="no-tags">No tags</span>`;
+  return `<span class="tag-chip k-${a.tag.kind}">${a.tag.label}</span>`;
+}
+function rowHtml(a, meta){
+  const dot = a.viewed ? '' : '<span class="unviewed-dot" title="Unviewed"></span>';
+  return `<tr>
+    <td class="col-check"><input type="checkbox" aria-label="Select ${a.name}"></td>
+    <td class="col-name"><span class="row-name">${dot}<span class="avatar">${ICON_USER}</span>${a.name} <span class="row-meta">· ${a.age}</span></span></td>
+    <td class="col-tags">${tagHtml(a)}</td>
+    <td class="col-docs">${docStatusHtml(a)}</td>
+    <td class="col-action"><button class="jj-btn ${meta.actionClass} jj-btn--sm">${meta.actionLabel}</button></td>
+  </tr>`;
+}
+function emptyRowHtml(){
+  return `<tr class="empty-row"><td colspan="5">
+    <div class="empty-icon">${ICON_SEARCH_EMPTY}</div>
+    No applicants match your filters in this section.<br>
+    <button class="link-btn" onclick="clearAll()">Clear filters</button>
+  </td></tr>`;
+}
+
+function optionsHtml(dim){
+  return FILTER_DEFS[dim].map(o=>`<option value="${o.value}">${o.label}</option>`).join('');
+}
+function populateFilterSelects(){
+  document.getElementById('radiusSelect').innerHTML = optionsHtml('radius');
+  document.getElementById('ageSelect').innerHTML = optionsHtml('age');
+  document.getElementById('genderSelect').innerHTML = optionsHtml('gender');
+  document.getElementById('drawerRadiusSelect').innerHTML = optionsHtml('radius');
+  document.getElementById('drawerAgeSelect').innerHTML = optionsHtml('age');
+  document.getElementById('drawerGenderSelect').innerHTML = optionsHtml('gender');
+}
+
+function sectionShellHtml(meta){
+  const openAttr = meta.key==='shortlisted' ? 'open' : '';
+  const jobfit = meta.jobfit ? `<span class="jobfit">Sorted based on JobFIT&trade; ${ICON_INFO}</span>` : '';
+  return `
+  <details class="section" ${openAttr} id="sec-${meta.key}">
+    <summary>
+      <div class="sec-row1">
+        <span class="chevron">${ICON_CHEVRON_DOWN}</span>
+        <h3>${meta.title}</h3>
+        <span class="badge" id="count-${meta.key}">0</span>
+        <span class="of-total" id="oftotal-${meta.key}"></span>
+        <span class="sec-spacer"></span>
+        ${jobfit}
+      </div>
+    </summary>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th></th><th>Name</th><th>Tags</th><th>Documents</th><th></th></tr></thead>
+        <tbody id="rows-${meta.key}"></tbody>
+      </table>
+      <div class="pagination" id="pag-${meta.key}"></div>
+    </div>
+  </details>`;
+}
+function paginationHtml(key, page, totalPages){
+  if(totalPages<=1) return '';
+  return `<div class="pagination is-visible">
+    <span class="page-indicator">Page ${page} of ${totalPages}</span>
+    <button class="page-btn" data-page-nav="${key}:${page-1}" ${page<=1?'disabled':''}>${ICON_CHEVRON_LEFT}</button>
+    <button class="page-btn" data-page-nav="${key}:${page+1}" ${page>=totalPages?'disabled':''}>${ICON_CHEVRON_RIGHT}</button>
+  </div>`;
+}
+
+function buildSkeleton(){
+  document.getElementById('sections').innerHTML = CONTAINERS.map(sectionShellHtml).join('');
+}
+
+function renderAll(){
+  CONTAINERS.forEach(meta=>{
+    const all = DATA.filter(a=>a.container===meta.key);
+    const visible = all.filter(matches);
+
+    const key = meta.key;
+    const totalPages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE));
+    let page = pageState[key] || 1;
+    if(page > totalPages) page = totalPages;
+    pageState[key] = page;
+    const pageItems = visible.slice((page-1)*PAGE_SIZE, page*PAGE_SIZE);
+
+    document.getElementById(`rows-${key}`).innerHTML = pageItems.length ? pageItems.map(a=>rowHtml(a, meta)).join('') : (visible.length ? '' : emptyRowHtml());
+    document.getElementById(`count-${key}`).textContent = visible.length;
+
+    const of = document.getElementById(`oftotal-${key}`);
+    if(visible.length !== all.length){ of.textContent = `of ${all.length}`; of.classList.add('is-visible'); }
+    else { of.classList.remove('is-visible'); }
+
+    document.getElementById(`pag-${key}`).innerHTML = paginationHtml(key, page, totalPages);
+  });
+  syncControls();
+}
+
+function syncControls(){
+  document.querySelectorAll('.f-select[data-key]').forEach(el=>{
+    const key = el.dataset.key;
+    el.value = state[key];
+    el.classList.toggle('is-active', state[key] !== 'any');
+  });
+  document.querySelectorAll('.f-toggle[data-key]').forEach(el=>{
+    const on = !!state[el.dataset.key];
+    el.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  const anyActive = isAnyFilterActive();
+  document.querySelectorAll('.clear-all').forEach(el=>el.classList.toggle('is-visible', anyActive));
+
+  const count = activeFilterCount();
+  const moreBtn = document.getElementById('moreFiltersBtn');
+  moreBtn.classList.toggle('is-active', count > 0);
+  document.getElementById('mfCount').textContent = count;
+}
+
+function setFilter(key, value){
+  state[key] = value;
+  pageState = {};
+  renderAll();
+}
+function clearAll(){
+  state = {radius:'any', age:'any', gender:'any', unviewed:false, relevantExperience:false, search:'', transport:'any', qualification:'any', score:'any', criminal:'any'};
+  pageState = {};
+  document.querySelectorAll('.search-input').forEach(el=>el.value='');
+  renderAll();
+}
+
+/* ---- delegated events ---- */
+document.addEventListener('change', (e)=>{
+  if(e.target.classList.contains('f-select') && e.target.dataset.key){
+    setFilter(e.target.dataset.key, e.target.value);
+  }
+});
+document.addEventListener('click', (e)=>{
+  const toggle = e.target.closest('.f-toggle[data-key]');
+  if(toggle){
+    setFilter(toggle.dataset.key, !state[toggle.dataset.key]);
+    return;
+  }
+  const pageBtn = e.target.closest('[data-page-nav]');
+  if(pageBtn && !pageBtn.disabled){
+    const [key, pageStr] = pageBtn.dataset.pageNav.split(':');
+    pageState[key] = Number(pageStr);
+    renderAll();
+  }
+});
+document.addEventListener('input', (e)=>{
+  if(e.target.classList.contains('search-input')){
+    state.search = e.target.value.trim().toLowerCase();
+    pageState = {};
+    document.querySelectorAll('.search-input').forEach(el=>{ if(el!==e.target) el.value = e.target.value; });
+    renderAll();
+  }
+});
+
+/* ---- drawer ---- */
+function openDrawer(){ document.getElementById('drawerOverlay').classList.add('is-open'); }
+function closeDrawer(){ document.getElementById('drawerOverlay').classList.remove('is-open'); }
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); });
+
+/* ---- init ---- */
+populateFilterSelects();
+buildSkeleton();
+renderAll();
+</script>
