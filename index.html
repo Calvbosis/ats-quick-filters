@@ -125,15 +125,21 @@ svg{display:block;flex-shrink:0;}
   border:1px solid var(--border-strong);border-radius:var(--r-ctrl);
   padding:7px 26px 7px 12px;font-size:12px;font-weight:600;color:var(--ink-muted);
   cursor:pointer;min-width:0;
+  transition:background-color .12s, border-color .12s;
 }
 .f-select:focus-visible{outline:2px solid var(--brand);outline-offset:1px;}
+.f-select:hover{background-color:var(--surface-muted);border-color:var(--ink-faint);}
 .f-select.is-active{border-color:var(--brand);background-color:var(--brand-tint);color:var(--brand-tint-text);}
+.f-select.is-active:hover{background-color:var(--brand-tint-strong);border-color:var(--brand);}
 .f-toggle{
   display:inline-flex;align-items:center;gap:6px;
   border:1px solid var(--border-strong);border-radius:var(--r-ctrl);background:var(--surface);
   color:var(--ink-muted);font-size:12px;font-weight:600;padding:7px 12px;cursor:pointer;
+  transition:background-color .12s, border-color .12s;
 }
+.f-toggle:hover{background-color:var(--surface-muted);border-color:var(--ink-faint);}
 .f-toggle[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-tint);color:var(--brand-tint-text);}
+.f-toggle[aria-pressed="true"]:hover{background-color:var(--brand-tint-strong);border-color:var(--brand);}
 
 /* ============ SECTIONS / TABLE ============ */
 .section{
@@ -557,6 +563,24 @@ function syncControls(){
   const moreBtn = document.getElementById('moreFiltersBtn');
   moreBtn.classList.toggle('is-active', count > 0);
   document.getElementById('mfCount').textContent = count;
+
+  sizeQuickSelects();
+}
+
+/* size the quick-bar selects to fit their currently displayed text, not the widest option */
+const _measureCanvas = document.createElement('canvas');
+const _measureCtx = _measureCanvas.getContext('2d');
+const QUICK_SELECT_FONT = '600 12px Inter, system-ui, -apple-system, sans-serif';
+const QUICK_SELECT_PAD_LEFT = 12, QUICK_SELECT_PAD_RIGHT = 26, QUICK_SELECT_BORDER = 2;
+function sizeQuickSelects(){
+  ['radiusSelect', 'ageSelect', 'genderSelect'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    const text = el.options[el.selectedIndex] ? el.options[el.selectedIndex].textContent : '';
+    _measureCtx.font = QUICK_SELECT_FONT;
+    const textWidth = _measureCtx.measureText(text).width;
+    el.style.width = Math.ceil(textWidth + QUICK_SELECT_PAD_LEFT + QUICK_SELECT_PAD_RIGHT + QUICK_SELECT_BORDER) + 'px';
+  });
 }
 
 function setFilter(key, value){
@@ -608,4 +632,5 @@ document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDrawer(); 
 populateFilterSelects();
 buildSkeleton();
 renderAll();
+if(document.fonts && document.fonts.ready){ document.fonts.ready.then(sizeQuickSelects); }
 </script>
